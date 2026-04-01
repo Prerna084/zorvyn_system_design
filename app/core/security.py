@@ -1,0 +1,33 @@
+from datetime import UTC, datetime, timedelta
+
+import bcrypt
+from jose import JWTError, jwt
+
+from app.config import settings
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+
+
+def get_password_hash(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def create_access_token(subject: str, user_id: int, expires_delta: timedelta | None = None) -> str:
+    expire = datetime.now(UTC) + (
+        expires_delta if expires_delta else timedelta(minutes=settings.access_token_expire_minutes)
+    )
+    to_encode = {"sub": subject, "user_id": user_id, "exp": expire}
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+
+
+def decode_token(token: str) -> dict:
+    return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+
+
+def safe_decode_token(token: str) -> dict | None:
+    try:
+        return decode_token(token)
+    except JWTError:
+        return None
