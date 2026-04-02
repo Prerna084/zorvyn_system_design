@@ -43,16 +43,16 @@ pytest tests -q
 
 | Capability | viewer | analyst | admin |
 |------------|--------|---------|-------|
-| `GET /api/dashboard/summary` | yes | yes | yes |
-| `GET /api/records`, `GET /api/records/{id}` | no | yes | yes |
+| `GET /api/dashboard/summary` | no | yes | yes |
+| `GET /api/records`, `GET /api/records/{id}` | yes | yes | yes |
 | `POST/PATCH/DELETE /api/records` | no | no | yes |
 | `GET/POST/PATCH /api/users`, deactivate user | no | no | yes |
 | `GET /api/users/{id}` | own id only | own id only | any |
 | `GET /api/auth/me`, `POST /api/auth/token` | yes | yes | yes |
 
-- **Viewer**: dashboard aggregates only (assignment: “view dashboard data”); cannot list raw records.
-- **Analyst**: read records and full dashboard (insights via summaries and listing).
-- **Admin**: full record and user management; soft-deletes financial records (`deleted_at`).
+- **Viewer**: Read-only access to raw financial records. Cannot view high-level dashboard summaries.
+- **Analyst**: Full dashboard insights via summaries and raw record listing. No mutation rights.
+- **Admin**: Full record and user management; soft-deletes financial records.
 
 ## API overview
 
