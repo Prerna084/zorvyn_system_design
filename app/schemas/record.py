@@ -2,7 +2,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
-from app.models import EntryType
+from app.models.record import EntryType
 
 
 class FinancialRecordCreate(BaseModel):

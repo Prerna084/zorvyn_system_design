@@ -10,7 +10,8 @@ from sqlalchemy import select
 from app.core.security import get_password_hash
 from app.database import SessionLocal, engine
 from app.database import Base
-from app.models import EntryType, FinancialRecord, User, UserRole
+from app.models.record import EntryType, FinancialRecord
+from app.models.user import User, UserRole
 
 
 def seed() -> None:

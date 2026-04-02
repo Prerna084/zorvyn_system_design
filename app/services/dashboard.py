@@ -6,8 +6,8 @@ from typing import Literal
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import EntryType, FinancialRecord
-from app.schemas.finance import (
+from app.models.record import EntryType, FinancialRecord
+from app.schemas.record import (
     CategoryTotal,
     DashboardSummary,
     PeriodTrend,

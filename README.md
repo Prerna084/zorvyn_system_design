@@ -1,112 +1,106 @@
-# Finance dashboard backend
+# Finance Dashboard API
 
-Backend for a finance dashboard with **role-based access control**, **financial record CRUD**, **aggregated dashboard metrics**, **JWT authentication**, and **PostgreSQL** persistence.
+## 1. Project Overview
 
-## Quick start
+The Finance Dashboard API is a production-ready, highly structured backend system designed for managing and visualizing personal or enterprise financial records. Built with **FastAPI** and **PostgreSQL**, this backend enforces strict role-based data isolation while aggregating complex analytics (income vs. expense, monthly buckets, category-level totals) efficiently. Key features include JWT stateless authentication, data validation via Pydantic, advanced filtering, and a robust layered architecture.
+
+---
+
+## 2. Architecture
+
+The codebase adheres strictly to an industry-standard **Controller-Service-Model** pattern. Dependency injection connects these layers ensuring clean, testable code.
+
+```text
+API → Service → Model → DB
+```
+### Project Layout
+```
+app/
+├── api/             # Controllers (Route endpoints that handle HTTP exclusively)
+├── services/        # Service Layer (Business logic and SQLAlchemy database queries)
+├── models/          # Database Models (SQLAlchemy table definitions)
+├── schemas/         # Pydantic Schemas (Input validation and response serializers)
+├── core/            # Configuration and Core Security (JWT, settings)
+├── dependencies/    # FastAPI Dependencies (Auth workflows and role enforcement)
+└── main.py          # FastAPI application factory
+```
+
+---
+
+## 3. Role-Based Access
+
+The application features three distinct user tiers that are strictly enforced via FastAPI endpoint dependencies:
+
+| Capability | Viewer | Analyst | Admin |
+|------------|--------|---------|-------|
+| `GET /api/dashboard/summary` | ❌ No | ✅ Yes | ✅ Yes |
+| `GET /api/records` | ✅ Yes | ✅ Yes | ✅ Yes |
+| `POST/PATCH/DELETE /api/records`| ❌ No | ❌ No | ✅ Yes |
+| `Users Management` | ❌ No | ❌ No | ✅ Yes |
+
+- **Viewer**: Baseline read-only access to raw financial records. Cannot view high-level dashboard summaries or metrics.
+- **Analyst**: Deep analytics access. Granted permission to hit heavy aggregation endpoints (Dashboard) as well as list raw records. No mutation rights.
+- **Admin**: Full authority. Can create, edit, or soft-delete financial records, and manage onboarding or deactivating of user accounts.
+
+---
+
+## 4. API List
+
+All authenticated routes require an `Authorization: Bearer <token>` header.
+
+### Authentication (`/api/auth`)
+- `POST /api/auth/token` — OAuth2 Password Flow. Accepts `username` and `password` and returns a JWT token.
+- `GET /api/auth/me` — Returns the currently authenticated user's profile.
+
+### Users (`/api/users`)
+- `GET /api/users` — List active users (Admin only). Includes `skip` and `limit` **pagination**.
+- `POST /api/users` — Provision a new user (Admin only).
+- `GET /api/users/{id}` — Retrieve details (Admin or self).
+- `PATCH /api/users/{id}` — Update profile fields (Admin only).
+- `DELETE /api/users/{id}` — Deactivate a user.
+
+### Financial Records (`/api/records`)
+- `GET /api/records` — Fetch financial records globally. Supports **Pagination** (`skip`, `limit`) and **Advanced Filtering** (`type`, `category`, `date_from`, `date_to`, `q`).
+- `POST /api/records` — Create a new financial record. (Admin only)
+- `PATCH /api/records/{id}` — Update record details. (Admin only)
+- `DELETE /api/records/{id}` — **Soft delete** a record. (Admin only)
+
+### Dashboard (`/api/dashboard`)
+- `GET /api/dashboard/summary` — Analytics engine. Provides total net balance, income/expense breakdown, category groupings, and historic weekly/monthly buckets in a single payload.
+
+---
+
+## 5. Design Decisions
+
+- **Layered Architecture (Service Layer):** Removed database query blocks from API routes to physically separate the `HTTP layer` from the `Persistence layer`. 
+- **RBAC Dependency Injection:** Implemented modular `RequireAdmin` and `RequireAnyAuthenticated` dependency objects to instantly short-circuit unauthorized requests before hitting the controllers.
+- **PostgreSQL Persistence:** Ejected SQLite in favor of a robust, fully relational DB.
+- **Soft Deletes:** Deleting a `FinancialRecord` does not run a DROP against the table. Instead, `deleted_at` is stamped. Record fetching services filter heavily by `deleted_at IS NULL` to preserve historical integrity.
+- **Advanced Filtering & Pagination:** Engineered robust `limit`/`offset` handling combined with multi-parameter filtering so frontend clients can safely browse massive datasets efficiently.
+- **Single-Payload Dashboard:** Instead of requiring clients to send 5 different network requests for graph rendering, a custom Python dict/groupby generator iterates the data and returns all insights in one hyper-optimized loop.
+
+---
+
+## 6. How to Run
+
+### Initial Setup
+Ensure PostgreSQL is running locally on port 5432 with a database named `finance_db`.
 
 ```bash
+# 1. Create your virtual environment and install dependencies
 python -m venv .venv
 .venv\Scripts\activate          # Windows
 pip install -r requirements.txt
-set PYTHONPATH=.
+
+# 2. Seed the PostgreSQL database with demo data + users
+set PYTHONPATH=.                # CMD
+$env:PYTHONPATH="."             # PowerShell
 python scripts/seed.py
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-- Interactive API docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) (Swagger UI)
-- Health: `GET /health`
-
-### Configuration
-
-Optional `.env` (see values in `app/config.py`):
-
-- `SECRET_KEY` — JWT signing secret (set a strong value outside local dev)
-- `DATABASE_URL` — default `postgresql://postgres:postgres@localhost:5432/finance_db`
-
-### Demo users (after seed)
-
-| Email | Password | Role |
-|--------|----------|------|
-| admin@example.com | admin12345 | admin |
-| analyst@example.com | analyst12345 | analyst |
-| viewer@example.com | viewer12345 | viewer |
-
-### Tests
-
+### Start Server
 ```bash
-pip install -r requirements-dev.txt
-set PYTHONPATH=.
-pytest tests -q
+uvicorn app.main:app --reload
 ```
 
-## Role model and access control
-
-| Capability | viewer | analyst | admin |
-|------------|--------|---------|-------|
-| `GET /api/dashboard/summary` | no | yes | yes |
-| `GET /api/records`, `GET /api/records/{id}` | yes | yes | yes |
-| `POST/PATCH/DELETE /api/records` | no | no | yes |
-| `GET/POST/PATCH /api/users`, deactivate user | no | no | yes |
-| `GET /api/users/{id}` | own id only | own id only | any |
-| `GET /api/auth/me`, `POST /api/auth/token` | yes | yes | yes |
-
-- **Viewer**: Read-only access to raw financial records. Cannot view high-level dashboard summaries.
-- **Analyst**: Full dashboard insights via summaries and raw record listing. No mutation rights.
-- **Admin**: Full record and user management; soft-deletes financial records.
-
-## API overview
-
-All authenticated routes expect `Authorization: Bearer <token>`. Obtain a token with **OAuth2 password flow**:
-
-`POST /api/auth/token`  
-Form fields: `username` = email, `password` = password.
-
-### Users (`/api/users`)
-
-- `GET /api/users` — list (admin), pagination `skip`, `limit`
-- `POST /api/users` — create (admin)
-- `GET /api/users/{id}` — self or admin
-- `PATCH /api/users/{id}` — update (admin)
-- `DELETE /api/users/{id}` — set inactive (admin; cannot deactivate self)
-
-### Financial records (`/api/records`)
-
-- `GET /api/records` — filters: `type` (income|expense), `category`, `date_from`, `date_to`, `q` (search category/notes), `skip`, `limit`
-- `POST /api/records` — body: `amount` (>0), `type`, `category`, `entry_date`, optional `notes`
-- `PATCH /api/records/{id}` — partial update
-- `DELETE /api/records/{id}` — soft delete
-
-### Dashboard (`/api/dashboard`)
-
-- `GET /api/dashboard/summary` — optional `date_from`, `date_to`, `recent_limit`  
-  Returns: total income/expense, net balance, category totals, recent activity, weekly and monthly trend buckets.
-
-## Data model
-
-- **User**: email (unique), hashed password (bcrypt), `role`, `is_active`, timestamps.
-- **FinancialRecord**: `amount`, `type` (income/expense), `category`, `entry_date`, `notes`, `created_by_id`, `deleted_at` for soft delete.
-
-## Assumptions and tradeoffs
-
-- **Single-tenant**: one shared ledger; no per-tenant isolation (can be added with `org_id` if needed).
-- **PostgreSQL** for robustness and data integrity.
-- **JWT** stateless auth; no refresh-token flow (acceptable for the assignment scope).
-- **Validation**: Pydantic models + FastAPI; `422` returns structured `detail` for invalid input.
-- **Soft delete** on records preserves history for analytics; adjust queries if hard delete is required.
-
-## Project layout
-
-```
-app/
-  main.py              # FastAPI app, router mount, validation error handler
-  config.py
-  database.py
-  models.py
-  core/security.py     # bcrypt + JWT
-  api/deps.py          # auth + role dependencies
-  api/routes/          # auth, users, records, dashboard
-  schemas/             # Pydantic DTOs
-  services/dashboard.py
-scripts/seed.py
-tests/test_smoke.py
-```
+Test the API interactively at: **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**

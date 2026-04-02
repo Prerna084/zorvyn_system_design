@@ -4,9 +4,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.api.deps import RequireAnalystOrAdmin
+from app.dependencies.auth import RequireAnalystOrAdmin
 from app.database import get_db
-from app.schemas.finance import DashboardSummary
+from app.schemas.record import DashboardSummary
 from app.services.dashboard import build_dashboard_summary
 
 router = APIRouter()

@@ -14,22 +14,19 @@ def test_health() -> None:
     assert r.json()["status"] == "ok"
 
 
-def test_rbac_viewer_cannot_list_records() -> None:
+def test_rbac_viewer_can_list_records() -> None:
     t = client.post(
         "/api/auth/token",
         data={"username": "viewer@example.com", "password": "viewer12345"},
     ).json()["access_token"]
     r = client.get("/api/records", headers={"Authorization": f"Bearer {t}"})
-    assert r.status_code == 403
+    assert r.status_code == 200
 
 
-def test_viewer_can_dashboard() -> None:
+def test_viewer_cannot_dashboard() -> None:
     t = client.post(
         "/api/auth/token",
         data={"username": "viewer@example.com", "password": "viewer12345"},
     ).json()["access_token"]
     r = client.get("/api/dashboard/summary", headers={"Authorization": f"Bearer {t}"})
-    assert r.status_code == 200
-    body = r.json()
-    assert "total_income" in body
-    assert "weekly_trends" in body
+    assert r.status_code == 403

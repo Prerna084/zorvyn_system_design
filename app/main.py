@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.api.routes import api_router
-from app.config import settings
+from app.core.config import settings
 from app.database import Base, engine
 
 
