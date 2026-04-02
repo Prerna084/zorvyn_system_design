@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 
-The Finance Dashboard API is a production-ready, highly structured backend system designed for managing and visualizing personal or enterprise financial records. Built with **FastAPI** and **PostgreSQL**, this backend enforces strict role-based data isolation while aggregating complex analytics (income vs. expense, monthly buckets, category-level totals) efficiently. Key features include JWT stateless authentication, data validation via Pydantic, advanced filtering, and a robust layered architecture.
+The Finance Dashboard API is a highly structured backend system designed with production-level architecture principles for managing and visualizing personal or enterprise financial records. Built with **FastAPI** and **PostgreSQL**, this backend enforces strict role-based data isolation while aggregating complex analytics (income vs. expense, monthly buckets, category-level totals) efficiently. Key features include JWT stateless authentication, data validation via Pydantic, advanced filtering, and a robust layered architecture.
 
 ---
 
@@ -68,6 +68,20 @@ All authenticated routes require an `Authorization: Bearer <token>` header.
 ### Dashboard (`/api/dashboard`)
 - `GET /api/dashboard/summary` — Analytics engine. Provides total net balance, income/expense breakdown, category groupings, and historic weekly/monthly buckets in a single payload.
 
+**Sample Dashboard Response:**
+```json
+{
+  "total_income": 8500.00,
+  "total_expense": 3200.50,
+  "net_balance": 5299.50,
+  "category_totals": [
+    { "category": "Food", "type": "expense", "amount": 450.00 }
+  ],
+  "recent_activity": [],
+  "monthly_trends": []
+}
+```
+
 ---
 
 ## 5. Design Decisions
@@ -104,3 +118,11 @@ uvicorn app.main:app --reload
 ```
 
 Test the API interactively at: **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**
+
+---
+
+## 7. Future Improvements
+
+- Introduce caching for dashboard queries to handle heavy analytical loads.
+- Add rate limiting for API endpoint protection.
+- Implement audit logging for sensitive financial mutations or permission changes.
