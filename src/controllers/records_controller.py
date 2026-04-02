@@ -1,19 +1,13 @@
 from datetime import date
 from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
+from src.middlewares.auth import RequireAdmin, RequireAnyAuthenticated
+from src.config.database import get_db
+from src.models.record import EntryType, FinancialRecord
+from src.validations.record import FinancialRecordCreate, FinancialRecordOut, FinancialRecordUpdate
+from src.services import record_service
 
-from app.dependencies.auth import RequireAdmin, RequireAnyAuthenticated
-from app.database import get_db
-from app.models.record import EntryType, FinancialRecord
-from app.schemas.record import FinancialRecordCreate, FinancialRecordOut, FinancialRecordUpdate
-from app.services import record_service
-
-router = APIRouter()
-
-
-@router.get("", response_model=list[FinancialRecordOut])
 def list_records(
     _: RequireAnyAuthenticated,
     db: Annotated[Session, Depends(get_db)],
@@ -27,8 +21,6 @@ def list_records(
 ) -> list[FinancialRecord]:
     return record_service.list_records_service(db, skip, limit, type, category, date_from, date_to, q)
 
-
-@router.get("/{record_id}", response_model=FinancialRecordOut)
 def get_record(
     record_id: int,
     _: RequireAnyAuthenticated,
@@ -39,8 +31,6 @@ def get_record(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found")
     return rec
 
-
-@router.post("", response_model=FinancialRecordOut, status_code=status.HTTP_201_CREATED)
 def create_record(
     body: FinancialRecordCreate,
     current: RequireAdmin,
@@ -48,8 +38,6 @@ def create_record(
 ) -> FinancialRecord:
     return record_service.create_record_service(db, body, current.id)
 
-
-@router.patch("/{record_id}", response_model=FinancialRecordOut)
 def update_record(
     record_id: int,
     body: FinancialRecordUpdate,
@@ -61,8 +49,6 @@ def update_record(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found")
     return rec
 
-
-@router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_record(
     record_id: int,
     _: RequireAdmin,

@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 import bcrypt
 from jose import JWTError, jwt
 
-from app.core.config import settings
+from src.config.config import settings
 
 
 def verify_password(plain: str, hashed: str) -> bool:

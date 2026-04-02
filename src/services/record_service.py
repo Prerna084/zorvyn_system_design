@@ -3,8 +3,8 @@ from datetime import UTC, date, datetime
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app.models.record import EntryType, FinancialRecord
-from app.schemas.record import FinancialRecordCreate, FinancialRecordUpdate
+from src.models.record import EntryType, FinancialRecord
+from src.validations.record import FinancialRecordCreate, FinancialRecordUpdate
 
 
 def list_records_service(

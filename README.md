@@ -15,14 +15,15 @@ API → Service → Model → DB
 ```
 ### Project Layout
 ```
-app/
-├── api/             # Controllers (Route endpoints that handle HTTP exclusively)
-├── services/        # Service Layer (Business logic and SQLAlchemy database queries)
+src/
+├── config/          # Environment variables and configuration related things
+├── controllers/     # Route controllers (Controller layer)
+├── middlewares/     # Custom middlewares and FastAPI Dependencies
 ├── models/          # Database Models (SQLAlchemy table definitions)
-├── schemas/         # Pydantic Schemas (Input validation and response serializers)
-├── core/            # Configuration and Core Security (JWT, settings)
-├── dependencies/    # FastAPI Dependencies (Auth workflows and role enforcement)
-└── main.py          # FastAPI application factory
+├── routes/          # Routes
+├── services/        # Business logic (Service layer)
+├── validations/     # Request data validation schemas (Pydantic)
+└── main.py          # App entry point
 ```
 
 ---
@@ -95,7 +96,13 @@ All authenticated routes require an `Authorization: Bearer <token>` header.
 
 ---
 
-## 6. How to Run
+## 6. Production Considerations
+
+- **Rate Limiting:** Added a strict rate limit (`5/minute`) on the `/api/auth/token` authentication endpoint using `slowapi` to prevent brute-force attacks and credential stuffing, ensuring a secure and stable production environment.
+
+---
+
+## 7. How to Run
 
 ### Initial Setup
 Ensure PostgreSQL is running locally on port 5432 with a database named `finance_db`.
@@ -114,15 +121,14 @@ python scripts/seed.py
 
 ### Start Server
 ```bash
-uvicorn app.main:app --reload
+uvicorn src.main:app --reload
 ```
 
 Test the API interactively at: **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**
 
 ---
 
-## 7. Future Improvements
+## 8. Future Improvements
 
 - Introduce caching for dashboard queries to handle heavy analytical loads.
-- Add rate limiting for API endpoint protection.
 - Implement audit logging for sensitive financial mutations or permission changes.

@@ -4,7 +4,7 @@ from datetime import date, datetime
 from sqlalchemy import Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database import Base
+from src.config.database import Base
 
 
 class EntryType(str, enum.Enum):
@@ -29,4 +29,4 @@ class FinancialRecord(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    created_by_user: Mapped["app.models.user.User | None"] = relationship("User", back_populates="financial_records")
+    created_by_user: Mapped["src.models.user.User | None"] = relationship("User", back_populates="financial_records")

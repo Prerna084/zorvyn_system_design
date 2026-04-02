@@ -1,22 +1,17 @@
 from datetime import timedelta
 from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from src.middlewares.auth import get_current_user
+from src.config.security import create_access_token, verify_password
+from src.config.database import get_db
+from src.models.user import User
+from src.validations.auth import Token
+from src.validations.user import UserOut
 
-from app.dependencies.auth import get_current_user
-from app.core.security import create_access_token, verify_password
-from app.database import get_db
-from app.models.user import User
-from app.schemas.auth import Token
-from app.schemas.user import UserOut
-
-router = APIRouter()
-
-
-@router.post("/token", response_model=Token)
 def login(
+    request: Request,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[Session, Depends(get_db)],
 ) -> Token:
@@ -32,7 +27,5 @@ def login(
     token = create_access_token(subject=user.email, user_id=user.id)
     return Token(access_token=token)
 
-
-@router.get("/me", response_model=UserOut)
 def me(current: Annotated[User, Depends(get_current_user)]) -> User:
     return current

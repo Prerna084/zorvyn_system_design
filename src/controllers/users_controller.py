@@ -1,18 +1,12 @@
 from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
+from src.middlewares.auth import RequireAdmin, RequireAnyAuthenticated, get_current_user
+from src.config.database import get_db
+from src.models.user import User, UserRole
+from src.validations.user import UserCreate, UserOut, UserUpdate
+from src.services import user_service
 
-from app.dependencies.auth import RequireAdmin, RequireAnyAuthenticated, get_current_user
-from app.database import get_db
-from app.models.user import User, UserRole
-from app.schemas.user import UserCreate, UserOut, UserUpdate
-from app.services import user_service
-
-router = APIRouter()
-
-
-@router.get("", response_model=list[UserOut])
 def list_users(
     _: RequireAdmin,
     db: Annotated[Session, Depends(get_db)],
@@ -21,8 +15,6 @@ def list_users(
 ) -> list[User]:
     return user_service.list_users_service(db, skip, limit)
 
-
-@router.post("", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def create_user(
     body: UserCreate,
     _: RequireAdmin,
@@ -32,8 +24,6 @@ def create_user(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
     return user_service.create_user_service(db, body)
 
-
-@router.get("/{user_id}", response_model=UserOut)
 def get_user(
     user_id: int,
     current: Annotated[User, Depends(get_current_user)],
@@ -46,8 +36,6 @@ def get_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
-
-@router.patch("/{user_id}", response_model=UserOut)
 def update_user(
     user_id: int,
     body: UserUpdate,
@@ -59,8 +47,6 @@ def update_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
-
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def deactivate_user(
     user_id: int,
     current: RequireAdmin,

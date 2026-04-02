@@ -10,3 +10,4 @@ python-jose[cryptography]==3.3.0
 bcrypt==4.2.1
 python-multipart==0.0.20
 python-dotenv==1.0.1
+slowapi==0.1.9

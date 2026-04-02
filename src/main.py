@@ -1,13 +1,16 @@
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
-from app.api.routes import api_router
-from app.core.config import settings
-from app.database import Base, engine
+from src.middlewares.rate_limit import limiter
+from src.routes.index import api_router
+from src.config.config import settings
+from src.config.database import Base, engine
 
 
 @asynccontextmanager
@@ -17,6 +20,8 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(api_router, prefix="/api")
 
 

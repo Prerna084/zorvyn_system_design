@@ -1,5 +1,5 @@
-from app.schemas.auth import Token, TokenPayload
-from app.schemas.record import (
+from src.validations.auth import Token, TokenPayload
+from src.validations.record import (
     CategoryTotal,
     DashboardSummary,
     FinancialRecordCreate,
@@ -8,7 +8,7 @@ from app.schemas.record import (
     PeriodTrend,
     RecentActivityItem,
 )
-from app.schemas.user import UserCreate, UserOut, UserUpdate
+from src.validations.user import UserCreate, UserOut, UserUpdate
 
 __all__ = [
     "Token",

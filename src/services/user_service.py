@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from app.models.user import User
-from app.core.security import get_password_hash
-from app.schemas.user import UserCreate, UserUpdate
+from src.models.user import User
+from src.config.security import get_password_hash
+from src.validations.user import UserCreate, UserUpdate
 
 
 def list_users_service(db: Session, skip: int = 0, limit: int = 50) -> list[User]:

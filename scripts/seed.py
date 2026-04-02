@@ -7,11 +7,11 @@ from datetime import date, timedelta
 
 from sqlalchemy import select
 
-from app.core.security import get_password_hash
-from app.database import SessionLocal, engine
-from app.database import Base
-from app.models.record import EntryType, FinancialRecord
-from app.models.user import User, UserRole
+from src.config.security import get_password_hash
+from src.config.database import SessionLocal, engine
+from src.config.database import Base
+from src.models.record import EntryType, FinancialRecord
+from src.models.user import User, UserRole
 
 
 def seed() -> None:

@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, Enum, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database import Base
+from src.config.database import Base
 
 
 class UserRole(str, enum.Enum):
@@ -28,6 +28,6 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    financial_records: Mapped[list["app.models.record.FinancialRecord"]] = relationship(
+    financial_records: Mapped[list["src.models.record.FinancialRecord"]] = relationship(
         "FinancialRecord", back_populates="created_by_user"
     )
