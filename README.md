@@ -1,75 +1,176 @@
-# Finance Dashboard API
+<div align="center">
+  <h1>🚀 Finance Dashboard API</h1>
+  <p><b>A production-grade, highly scalable financial data engine.</b></p>
+  
+  [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?logo=python&logoColor=white)](#)
+  [![FastAPI](https://img.shields.io/badge/FastAPI-0.103+-009688.svg?logo=fastapi&logoColor=white)](#)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791.svg?logo=postgresql&logoColor=white)](#)
+  [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-red.svg?logo=sqlalchemy&logoColor=white)](#)
+  [![JWT](https://img.shields.io/badge/Security-JWT_OAuth2-black.svg?logo=jsonwebtokens&logoColor=white)](#)
+</div>
 
-## 1. Project Overview
+<br/>
 
-The Finance Dashboard API is a highly structured backend system designed with production-level architecture principles for managing and visualizing personal or enterprise financial records. Built with **FastAPI** and **PostgreSQL**, this backend enforces strict role-based data isolation while aggregating complex analytics (income vs. expense, monthly buckets, category-level totals) efficiently. Key features include JWT stateless authentication, data validation via Pydantic, advanced filtering, and a robust layered architecture.
+## 📸 API Preview
+
+| Authentication | Users | Dashboard |
+|---------------|------|-----------|
+| ![](./assets/auth.png) | ![](./assets/users.png) | ![](./assets/dashboard.png) |
 
 ---
 
-## 2. Architecture
+## 1. Overview
 
-The codebase adheres strictly to an industry-standard **Controller-Service-Model** pattern. Dependency injection connects these layers ensuring clean, testable code.
+The **Finance Dashboard API** is a production-grade backend system designed to manage and analyze financial records for individuals or organizations. It provides secure, role-based access to financial data along with powerful aggregation capabilities for analytics such as income vs. expense tracking, category breakdowns, and time-based trends.
 
-```text
-API → Service → Model → DB
+Built using **FastAPI** and **PostgreSQL**, the system follows a clean, scalable architecture with strong emphasis on security, performance, and maintainability.
+
+---
+
+## 🚀 Why This Project Matters
+
+This project goes beyond basic CRUD operations and demonstrates:
+
+- Secure authentication using JWT (OAuth2 flow)
+- Role-based access control (RBAC)
+- Scalable backend architecture (Controller → Service → Model)
+- Real-world financial data aggregation (dashboard analytics)
+- Optimized querying with filtering and pagination
+
+It reflects how production backend systems are designed in real-world applications.
+
+---
+
+## 2. Tech Stack
+
+* **Backend Framework:** FastAPI
+* **Database:** PostgreSQL
+* **ORM:** SQLAlchemy
+* **Validation:** Pydantic
+* **Authentication:** JWT (OAuth2 Password Flow)
+* **Rate Limiting:** slowapi
+* **Server:** Uvicorn
+
+---
+
+## 3. Architecture
+
+The project follows a structured **Controller → Service → Model** architecture to ensure separation of concerns and maintainability.
+
 ```
-### Project Layout
+API → Controller → Service → Model → Database
+```
+
+### Project Structure
+
 ```
 src/
-├── config/          # Environment variables and configuration related things
-├── controllers/     # Route controllers (Controller layer)
-├── middlewares/     # Custom middlewares and FastAPI Dependencies
-├── models/          # Database Models (SQLAlchemy table definitions)
-├── routes/          # Routes
-├── services/        # Business logic (Service layer)
-├── validations/     # Request data validation schemas (Pydantic)
-└── main.py          # App entry point
+├── config/          # Configuration and environment setup
+├── controllers/     # Request handlers (Controller layer)
+├── middlewares/     # Custom dependencies and middleware
+├── models/          # SQLAlchemy models
+├── routes/          # API route definitions
+├── services/        # Business logic
+├── validations/     # Pydantic schemas
+└── main.py          # Application entry point
 ```
 
 ---
 
-## 3. Role-Based Access
+## 4. Role-Based Access Control (RBAC)
 
-The application features three distinct user tiers that are strictly enforced via FastAPI endpoint dependencies:
+The API enforces strict role-based permissions:
 
-| Capability | Viewer | Analyst | Admin |
-|------------|--------|---------|-------|
-| `GET /api/dashboard/summary` | ❌ No | ✅ Yes | ✅ Yes |
-| `GET /api/records` | ✅ Yes | ✅ Yes | ✅ Yes |
-| `POST/PATCH/DELETE /api/records`| ❌ No | ❌ No | ✅ Yes |
-| `Users Management` | ❌ No | ❌ No | ✅ Yes |
+| Capability          | Viewer | Analyst | Admin |
+| ------------------- | ------ | ------- | ----- |
+| View Records        | ✅      | ✅       | ✅     |
+| Dashboard Analytics | ❌      | ✅       | ✅     |
+| Modify Records      | ❌      | ❌       | ✅     |
+| User Management     | ❌      | ❌       | ✅     |
 
-- **Viewer**: Baseline read-only access to raw financial records. Cannot view high-level dashboard summaries or metrics.
-- **Analyst**: Deep analytics access. Granted permission to hit heavy aggregation endpoints (Dashboard) as well as list raw records. No mutation rights.
-- **Admin**: Full authority. Can create, edit, or soft-delete financial records, and manage onboarding or deactivating of user accounts.
+### Roles
+
+* **Viewer:** Read-only access to financial records
+* **Analyst:** Access to analytics and insights
+* **Admin:** Full control over records and users
 
 ---
 
-## 4. API List
+## 5. API Endpoints
 
-All authenticated routes require an `Authorization: Bearer <token>` header.
+All endpoints require authentication:
+
+```
+Authorization: Bearer <token>
+```
 
 ### Authentication (`/api/auth`)
-- `POST /api/auth/token` — OAuth2 Password Flow. Accepts `username` and `password` and returns a JWT token.
-- `GET /api/auth/me` — Returns the currently authenticated user's profile.
+
+### 📸 Authentication (JWT Login)
+
+The API uses OAuth2 Password Flow for secure authentication.
+
+- Generate token via `/api/auth/token`
+- Use token in `Authorization: Bearer <token>`
+- Required for all protected endpoints
+
+![Authentication](./assets/auth.png)
+
+---
 
 ### Users (`/api/users`)
-- `GET /api/users` — List active users (Admin only). Includes `skip` and `limit` **pagination**.
-- `POST /api/users` — Provision a new user (Admin only).
-- `GET /api/users/{id}` — Retrieve details (Admin or self).
-- `PATCH /api/users/{id}` — Update profile fields (Admin only).
-- `DELETE /api/users/{id}` — Deactivate a user.
+
+### 📸 Get Users (Admin Only)
+
+Returns a paginated list of users with role-based access.
+
+- Requires JWT authentication  
+- Supports pagination (`skip`, `limit`)  
+- Admin-only endpoint  
+
+![Users API](./assets/users.png)
+
+* `GET /api/users` — List users (Admin)
+* `POST /api/users` — Create user (Admin)
+* `GET /api/users/{id}` — Get user (Admin or self)
+* `PATCH /api/users/{id}` — Update user (Admin)
+* `DELETE /api/users/{id}` — Deactivate user
+
+---
 
 ### Financial Records (`/api/records`)
-- `GET /api/records` — Fetch financial records globally. Supports **Pagination** (`skip`, `limit`) and **Advanced Filtering** (`type`, `category`, `date_from`, `date_to`, `q`).
-- `POST /api/records` — Create a new financial record. (Admin only)
-- `PATCH /api/records/{id}` — Update record details. (Admin only)
-- `DELETE /api/records/{id}` — **Soft delete** a record. (Admin only)
+
+* `GET /api/records` — Fetch records (with filters & pagination)
+* `POST /api/records` — Create record (Admin)
+* `PATCH /api/records/{id}` — Update record (Admin)
+* `DELETE /api/records/{id}` — Soft delete record (Admin)
+
+#### Supported Filters
+
+* `type` (income/expense)
+* `category`
+* `date_from`, `date_to`
+* `q` (search query)
+* `skip`, `limit` (pagination)
+
+---
 
 ### Dashboard (`/api/dashboard`)
-- `GET /api/dashboard/summary` — Analytics engine. Provides total net balance, income/expense breakdown, category groupings, and historic weekly/monthly buckets in a single payload.
 
-**Sample Dashboard Response:**
+### 📸 Dashboard Analytics
+
+Provides real-time aggregated financial insights including income, expenses, net balance, and category-wise breakdown.
+
+- Single API call for complete analytics  
+- Optimized aggregation queries  
+- Role-based access (Analyst/Admin)  
+
+![Dashboard](./assets/dashboard.png)
+
+* `GET /api/dashboard/summary` — Aggregated financial insights
+
+#### Sample Response
+
 ```json
 {
   "total_income": 8500.00,
@@ -85,50 +186,115 @@ All authenticated routes require an `Authorization: Bearer <token>` header.
 
 ---
 
-## 5. Design Decisions
+## 6. Key Design Decisions
 
-- **Layered Architecture (Service Layer):** Removed database query blocks from API routes to physically separate the `HTTP layer` from the `Persistence layer`. 
-- **RBAC Dependency Injection:** Implemented modular `RequireAdmin` and `RequireAnyAuthenticated` dependency objects to instantly short-circuit unauthorized requests before hitting the controllers.
-- **PostgreSQL Persistence:** Ejected SQLite in favor of a robust, fully relational DB.
-- **Soft Deletes:** Deleting a `FinancialRecord` does not run a DROP against the table. Instead, `deleted_at` is stamped. Record fetching services filter heavily by `deleted_at IS NULL` to preserve historical integrity.
-- **Advanced Filtering & Pagination:** Engineered robust `limit`/`offset` handling combined with multi-parameter filtering so frontend clients can safely browse massive datasets efficiently.
-- **Single-Payload Dashboard:** Instead of requiring clients to send 5 different network requests for graph rendering, a custom Python dict/groupby generator iterates the data and returns all insights in one hyper-optimized loop.
+* **Layered Architecture:**
+  Business logic is isolated in services, keeping controllers lightweight and testable.
+
+* **RBAC via Dependency Injection:**
+  Custom dependencies enforce permissions before request execution.
+
+* **Soft Deletes:**
+  Records are not permanently removed; `deleted_at` ensures data integrity and auditability.
+
+* **Advanced Filtering & Pagination:**
+  Efficient querying for large datasets with flexible filters.
+
+* **Single-Payload Dashboard:**
+  Aggregations are computed in a single pass to reduce multiple API calls and improve performance.
 
 ---
 
-## 6. Production Considerations
+## 7. Security & Production Considerations
 
-- **Rate Limiting:** Added a strict rate limit (`5/minute`) on the `/api/auth/token` authentication endpoint using `slowapi` to prevent brute-force attacks and credential stuffing, ensuring a secure and stable production environment.
+* **JWT Authentication** for stateless security
+* **Rate Limiting** (`5 requests/minute`) on login endpoint to prevent brute-force attacks
+* **Data Isolation** enforced per user role
+* **Input Validation** using Pydantic schemas
 
 ---
 
-## 7. How to Run
+## 8. Environment Setup
 
-### Initial Setup
-Ensure PostgreSQL is running locally on port 5432 with a database named `finance_db`.
+Create a `.env` file in the root directory:
+
+```
+DATABASE_URL=postgresql://user:password@localhost:5432/finance_db
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+---
+
+## 9. Installation & Running
+
+### Step 1: Setup Environment
 
 ```bash
-# 1. Create your virtual environment and install dependencies
 python -m venv .venv
-.venv\Scripts\activate          # Windows
+.venv\Scripts\activate   # Windows
 pip install -r requirements.txt
+```
 
-# 2. Seed the PostgreSQL database with demo data + users
-set PYTHONPATH=.                # CMD
-$env:PYTHONPATH="."             # PowerShell
+### Step 2: Seed Database
+
+```bash
+set PYTHONPATH=.
 python scripts/seed.py
 ```
 
-### Start Server
+### Step 3: Run Server
+
 ```bash
 uvicorn src.main:app --reload
 ```
 
-Test the API interactively at: **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**
+---
+
+## 10. Demo Credentials
+
+| Role    | Username            | Password       |
+| ------- | ------------------- | -------------- |
+| Admin   | admin@example.com   | admin12345     |
+| Analyst | analyst@example.com | analyst12345   |
+| Viewer  | viewer@example.com  | viewer12345    |
 
 ---
 
-## 8. Future Improvements
+## 11. API Documentation
 
-- Introduce caching for dashboard queries to handle heavy analytical loads.
-- Implement audit logging for sensitive financial mutations or permission changes.
+Interactive Swagger UI available at:
+
+```
+http://127.0.0.1:8000/docs
+```
+
+---
+
+## 12. Testing
+
+APIs can be tested using:
+
+* Swagger UI
+* Postman or any API client
+
+---
+
+## 13. Future Improvements
+
+* Add caching (e.g., Redis) for dashboard queries
+* Implement audit logging for sensitive operations
+* Introduce automated test coverage
+* Dockerize the application for easier deployment
+
+---
+
+## 14. Summary
+
+This project demonstrates:
+
+* Scalable backend architecture
+* Secure authentication and authorization
+* Efficient data handling and aggregation
+* Production-ready design principles
