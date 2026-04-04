@@ -1,5 +1,16 @@
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.on_event("startup")
+def startup_event():
+    print("🚀 APP STARTING...")
+
+@app.get("/")
+def home():
+    return {"status": "working"}
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
