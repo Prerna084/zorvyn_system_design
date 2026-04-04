@@ -34,7 +34,7 @@ def update_user_service(db: Session, user_id: int, body: UserUpdate) -> User | N
     if not user:
         return None
         
-    data = body.model_dump(exclude_unset=True)
+    data = body.dict(exclude_unset=True)
     if "password" in data:
         data["hashed_password"] = get_password_hash(data.pop("password"))
     for k, v in data.items():

@@ -62,7 +62,7 @@ def update_record_service(
     if not rec or rec.deleted_at is not None:
         return None
         
-    data = body.model_dump(exclude_unset=True)
+    data = body.dict(exclude_unset=True)
     if "category" in data and data["category"] is not None:
         data["category"] = data["category"].strip()
     for k, v in data.items():

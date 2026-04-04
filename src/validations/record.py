@@ -31,8 +31,8 @@ class FinancialRecordOut(BaseModel):
     created_by_id: int | None
     created_at: datetime
     updated_at: datetime
-
-    model_config = {"from_attributes": True}
+    class Config:
+        orm_mode = True
 
 
 class RecentActivityItem(BaseModel):
