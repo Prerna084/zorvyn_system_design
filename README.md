@@ -11,6 +11,17 @@
 
 <br/>
 
+## 🌐 Live Demo
+
+🔗 **API Base URL:**  
+https://zorvyn-system-design.onrender.com
+
+📄 **Swagger Docs:**  
+https://zorvyn-system-design.onrender.com/docs
+
+❤️ **Health Check:**  
+https://zorvyn-system-design.onrender.com/health
+
 ## 📸 API Preview
 
 | Authentication | Users | Dashboard |
@@ -38,6 +49,17 @@ This project goes beyond basic CRUD operations and demonstrates:
 - Optimized querying with filtering and pagination
 
 It reflects how production backend systems are designed in real-world applications.
+
+---
+
+## ⚡ Key Highlights (What makes this production-ready)
+
+- Deployed on cloud (Render) with live API access
+- Clean architecture (Controller → Service → Model)
+- JWT-based authentication with RBAC
+- Optimized database queries with filtering & pagination
+- Rate limiting implemented for security
+- Scalable and modular code structure
 
 ---
 
@@ -264,7 +286,11 @@ uvicorn src.main:app --reload
 
 ## 11. API Documentation
 
-Interactive Swagger UI available at:
+### 🌐 Live API Docs
+
+https://zorvyn-system-design.onrender.com/docs
+
+Interactive Swagger UI (local):
 
 ```
 http://127.0.0.1:8000/docs
@@ -278,6 +304,17 @@ APIs can be tested using:
 
 * Swagger UI
 * Postman or any API client
+
+---
+
+## 🚀 Deployment
+
+The application is deployed on Render:
+
+- Python 3.11 runtime
+- FastAPI with Uvicorn
+- PostgreSQL database
+- Environment-based configuration
 
 ---
 
@@ -298,3 +335,16 @@ This project demonstrates:
 * Secure authentication and authorization
 * Efficient data handling and aggregation
 * Production-ready design principles
+
+---
+
+## 💼 Why This Project Stands Out
+
+This project demonstrates real-world backend engineering skills including:
+
+- API design with scalability in mind
+- Secure authentication and authorization
+- Database modeling and optimization
+- Production deployment and debugging
+
+It reflects readiness for backend engineering roles.
