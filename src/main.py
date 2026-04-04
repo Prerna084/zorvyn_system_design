@@ -1,20 +1,10 @@
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.on_event("startup")
-def startup_event():
-    print("🚀 APP STARTING...")
-
-@app.get("/")
-def home():
-    return {"status": "working"}
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -26,16 +16,22 @@ from src.config.database import Base, engine
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    print("🚀 APP STARTING...")   # debug log
     Base.metadata.create_all(bind=engine)
     yield
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
+
+# rate limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# routes
 app.include_router(api_router, prefix="/api")
 
 
+# validation handler
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_: object, exc: RequestValidationError) -> JSONResponse:
     return JSONResponse(
@@ -44,6 +40,13 @@ async def validation_exception_handler(_: object, exc: RequestValidationError) -
     )
 
 
+# health check
 @app.get("/health")
-def health() -> dict[str, str]:
+def health():
     return {"status": "ok"}
+
+
+# root route (optional but useful)
+@app.get("/")
+def home():
+    return {"status": "working 🚀"}
